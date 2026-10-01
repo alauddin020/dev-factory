@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevFactory · Graphite — Operations Console</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════ 1 · LOGIN SCREEN ════════════════════════ -->
+<section class="login-screen" id="screen-login">
+  <div class="login-glow" aria-hidden="true"></div>
+  <form class="login-card" id="loginForm" novalidate>
+    <div class="login-brand">
+      <span class="mark">DF</span>
+      <div><strong>DevFactory</strong><small>Operations Console</small></div>
+    </div>
+    <h1>Authenticate</h1>
+    <p class="lede">Sign in to resolve purchase orders to factory IDs and inspect their records.</p>
+
+    <label class="fld">
+      <span>Email</span>
+      <input id="email" type="email" value="planner@demo.com" autocomplete="username" spellcheck="false">
+    </label>
+    <label class="fld">
+      <span>Password</span>
+      <input id="password" type="password" value="demo1234" autocomplete="current-password">
+    </label>
+    <p class="ferr" id="loginError" hidden></p>
+
+    <button class="btn primary lg block" id="loginBtn" type="submit">
+      <span class="spin" hidden></span><span class="lbl">Sign in</span>
+    </button>
+
+    <div class="login-note">
+      <span class="k">Demo</span>
+      <span><code>planner@demo.com</code> / <code>demo1234</code></span>
+      <span><code>admin@demo.com</code> / <code>demo1234</code></span>
+    </div>
+  </form>
+</section>
+
+<!-- ════════════════════════════════ 2 · CONSOLE ═══════════════════════════ -->
+<div class="shell" id="screen-app" hidden>
+
+  <!-- ───────────── sidebar ───────────── -->
+  <aside class="sidebar">
+    <div class="side-brand">
+      <span class="mark">DF</span>
+      <div><strong>DevFactory</strong><small>v2 · console</small></div>
+    </div>
+
+    <nav class="side-nav" id="sideNav">
+      <button class="nav-item" data-step="factory" type="button">
+        <span class="ix">01</span><span class="tx"><b>Select factory</b><small>Choose a production unit</small></span>
+      </button>
+      <button class="nav-item" data-step="lookup" type="button">
+        <span class="ix">02</span><span class="tx"><b>Find purchase order</b><small>Resolve factory_id from PO</small></span>
+      </button>
+      <button class="nav-item" data-step="results" type="button">
+        <span class="ix">03</span><span class="tx"><b>Records</b><small>POs for the factory</small></span>
+      </button>
+    </nav>
+
+    <div class="side-foot">
+      <div class="side-user">
+        <span class="av" id="userAvatar">–</span>
+        <div><strong id="userName">–</strong><small id="userRole">–</small></div>
+      </div>
+      <button class="btn ghost sm block" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- ───────────── main ───────────── -->
+  <main class="main">
+    <header class="main-head">
+      <div>
+        <h1 id="pageTitle">Select a factory</h1>
+        <p id="pageSub">—</p>
+      </div>
+      <div class="head-tools">
+        <span class="badge-api" id="mockPill" hidden>mock api</span>
+        <button class="btn ghost sm" id="reloadBtn" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <div class="alert" id="alert" role="alert" hidden></div>
+
+    <!-- ══ FACTORY ══ -->
+    <section class="view" id="view-factory" hidden>
+      <div class="toolbar">
+        <label class="search">
+          <span>⌕</span>
+          <input id="factorySearch" type="search" placeholder="Filter factories — name, city, factory_id…" autocomplete="off">
+        </label>
+        <span class="count" id="factoryCount">–</span>
+      </div>
+      <div class="fac-list" id="factoryGrid"></div>
+      <p class="empty" id="factoryEmpty" hidden>No factories match that filter.</p>
+    </section>
+
+    <!-- ══ LOOKUP ══ -->
+    <section class="view" id="view-lookup" hidden>
+      <div class="ctx" id="selectedFactory"></div>
+
+      <form class="console-form" id="poForm" novalidate>
+        <div class="term">
+          <span class="prompt" aria-hidden="true">›</span>
+          <input id="poInput" type="text" placeholder="type a purchase order number, e.g. PO-2026-0001"
+                 autocomplete="off" spellcheck="false" aria-label="Purchase order number">
+          <button class="btn primary" id="lookupBtn" type="submit">
+            <span class="spin" hidden></span><span class="lbl">Resolve</span>
+          </button>
+        </div>
+        <ul class="sug" id="suggestions" hidden></ul>
+        <p class="ferr" id="poError" hidden></p>
+      </form>
+
+      <div class="legend">
+        <span class="dot"></span> The API returns <code>{ factory_id, po }</code> for the number you enter, then the
+        records list is loaded for that <code>factory_id</code>.
+      </div>
+      <div class="demo-pos">
+        <span class="k">Try</span>
+        <button type="button" class="chipbtn" data-demo-po="PO-2026-0001">PO-2026-0001 · own factory</button>
+        <button type="button" class="chipbtn" data-demo-po="PO-2026-0014">PO-2026-0014 · other factory</button>
+        <button type="button" class="chipbtn" data-demo-po="PO-2026-9999">PO-2026-9999 · not found</button>
+      </div>
+    </section>
+
+    <!-- ══ RESULTS ══ -->
+    <section class="view" id="view-results" hidden>
+      <div class="result-top">
+        <button class="back" id="backToLookup" type="button">← New search</button>
+        <span class="crumbs" id="crumbs"></span>
+      </div>
+
+      <article class="resolved" id="poHero"></article>
+
+      <div class="kpis" id="kpis"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2 id="recordsTitle">Records</h2>
+          <span class="count" id="recordsMeta">–</span>
+        </div>
+        <div class="toolbar">
+          <label class="search">
+            <span>⌕</span>
+            <input id="listSearch" type="search" placeholder="Filter records — PO, buyer, style, status…" autocomplete="off">
+          </label>
+          <div class="chips" id="statusChips"></div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl" id="recordsTable">
+            <thead>
+              <tr>
+                <th>PO number</th><th>Buyer</th><th>Style</th><th class="wide">Item</th>
+                <th class="ta-r">Qty</th><th>Status</th><th>Progress</th><th>Ship</th><th class="ta-r">Value</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="recordsEmpty" hidden>No records match the current filter.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- overlays -->
+<div class="toasts" id="toasts"></div>
+<div class="drawer" id="modal" hidden>
+  <div class="drawer-bd" data-close></div>
+  <aside class="drawer-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header class="drawer-head">
+      <h3 id="modalTitle">Record</h3>
+      <button class="icon-btn" data-close type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="drawer-body" id="modalBody"></div>
+  </aside>
+</div>
+
+<script src="../../shared/config.js"></script>
+<script src="../../shared/mock-data.js"></script>
+<script src="../../shared/format.js"></script>
+<script src="../../shared/api.js"></script>
+<script src="../../shared/store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

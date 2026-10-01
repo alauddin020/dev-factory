@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevFactory · Paper — Purchase Order Ledger</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-in">
+    <a class="wordmark" href="../../index.html">
+      <span class="wm-box">DF</span>
+      <span class="wm-txt"><strong>DevFactory</strong><em>Purchase Order Ledger</em></span>
+    </a>
+    <div class="mast-right">
+      <span class="stamp" id="mockPill" hidden>Mock data</span>
+      <span class="mast-user" id="userChip" hidden><b id="userName">–</b><i id="userRole">–</i></span>
+      <button class="tbtn" id="logoutBtn" type="button" hidden>Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ruled step tracker -->
+  <ol class="rail" id="steps">
+    <li data-step="login"><span class="n">01</span><span class="t">Sign in</span></li>
+    <li data-step="factory"><span class="n">02</span><span class="t">Factory</span></li>
+    <li data-step="lookup"><span class="n">03</span><span class="t">PO lookup</span></li>
+    <li data-step="results"><span class="n">04</span><span class="t">Ledger</span></li>
+  </ol>
+
+  <div class="note note-err" id="alert" role="alert" hidden></div>
+
+  <!-- ═══════════════════════════════ 01 · SIGN IN ═══════════════════════ -->
+  <section class="sheet" id="view-login">
+    <div class="sheet-head">
+      <h1>Sign in</h1>
+      <p class="kicker">Access restricted to merchandising &amp; planning staff.</p>
+    </div>
+
+    <form class="form" id="loginForm" novalidate>
+      <div class="row">
+        <label class="lbl" for="email">Work email</label>
+        <input class="inp" id="email" type="email" value="planner@demo.com" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="row">
+        <label class="lbl" for="password">Password</label>
+        <input class="inp" id="password" type="password" value="demo1234" autocomplete="current-password">
+      </div>
+      <p class="note note-err inline" id="loginError" hidden></p>
+      <div class="row row-act">
+        <span></span>
+        <button class="btn btn-ink" id="loginBtn" type="submit"><span class="spin" hidden></span><span class="lbl">Sign in</span></button>
+      </div>
+    </form>
+
+    <footer class="sheet-foot">
+      <b>Demo credentials</b>
+      <span><code>planner@demo.com</code> · <code>demo1234</code></span>
+      <span><code>admin@demo.com</code> · <code>demo1234</code></span>
+    </footer>
+  </section>
+
+  <!-- ══════════════════════════════ 02 · FACTORY ════════════════════════ -->
+  <section class="sheet" id="view-factory" hidden>
+    <div class="sheet-head row-head">
+      <div>
+        <h1>Select factory</h1>
+        <p class="kicker" id="factoryCount">–</p>
+      </div>
+      <button class="btn btn-paper" id="reloadFactories" type="button">Reload list</button>
+    </div>
+
+    <div class="filter">
+      <label class="lbl" for="factorySearch">Filter</label>
+      <input class="inp" id="factorySearch" type="search" placeholder="Factory name, city or ID…" autocomplete="off">
+    </div>
+
+    <table class="ledger ledger-fac">
+      <thead>
+        <tr><th class="w-no">#</th><th>Factory</th><th>Location</th><th class="ta-r">Units</th><th class="ta-r">Daily capacity</th><th>Status</th><th class="w-pick"></th></tr>
+      </thead>
+      <tbody id="factoryGrid"></tbody>
+    </table>
+    <p class="empty" id="factoryEmpty" hidden>No factories match that filter.</p>
+  </section>
+
+  <!-- ══════════════════════════════ 03 · LOOKUP ═════════════════════════ -->
+  <section class="sheet" id="view-lookup" hidden>
+    <button class="tbtn back" id="backToFactories" type="button">← Change factory</button>
+    <div class="sheet-head">
+      <h1>PO lookup</h1>
+      <p class="kicker">Enter a purchase order number. The API resolves the <code>factory_id</code> it belongs to, then the ledger is loaded for that factory.</p>
+    </div>
+
+    <div class="ctx" id="selectedFactory"></div>
+
+    <form class="form" id="poForm" novalidate>
+      <div class="row row-po">
+        <label class="lbl" for="poInput">Purchase order</label>
+        <div class="po-box">
+          <input class="inp inp-po" id="poInput" type="text" placeholder="PO-2026-0001" autocomplete="off" spellcheck="false">
+          <button class="btn btn-ink" id="lookupBtn" type="submit"><span class="spin" hidden></span><span class="lbl">Fetch records</span></button>
+        </div>
+        <ul class="sug" id="suggestions" hidden></ul>
+      </div>
+      <p class="note note-err inline" id="poError" hidden></p>
+    </form>
+
+    <p class="kicker mt">Examples —
+      <button class="tlink" type="button" data-demo-po="PO-2026-0014">PO-2026-0014</button> (different factory) ·
+      <button class="tlink" type="button" data-demo-po="PO-2026-9999">PO-2026-9999</button> (not found)
+    </p>
+  </section>
+
+  <!-- ══════════════════════════════ 04 · LEDGER ═════════════════════════ -->
+  <section id="view-results" hidden>
+    <div class="res-head">
+      <button class="tbtn back" id="backToLookup" type="button">← New lookup</button>
+      <span class="crumbs" id="crumbs"></span>
+    </div>
+
+    <article class="dossier" id="poHero"></article>
+
+    <div class="tally" id="kpis"></div>
+
+    <div class="sheet sheet-flush">
+      <div class="sheet-head row-head">
+        <div>
+          <h2>Records for <span id="recordsTitle">–</span></h2>
+          <p class="kicker" id="recordsMeta">–</p>
+        </div>
+        <div class="filter filter-inline">
+          <label class="lbl" for="listSearch">Search</label>
+          <input class="inp" id="listSearch" type="search" placeholder="PO, buyer, style…" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="tabs" id="statusChips"></div>
+
+      <div class="table-scroll">
+        <table class="ledger">
+          <thead>
+            <tr>
+              <th>PO number</th><th>Buyer</th><th>Style</th><th>Item</th>
+              <th class="ta-r">Qty</th><th>Status</th><th>Progress</th><th>Ship</th><th class="ta-r">Value</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="recordsEmpty" hidden>No records match your filters.</p>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <span>DevFactory · design version 3 “Paper”</span>
+    <span>Data source: <b id="srcLabel">—</b></span>
+  </footer>
+</main>
+
+<div class="toasts" id="toasts"></div>
+
+<div class="sheet-modal" id="modal" hidden>
+  <div class="sm-bd" data-close></div>
+  <div class="sm-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header class="sm-head">
+      <h3 id="modalTitle">Record</h3>
+      <button class="tbtn" data-close type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="sm-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="../../shared/config.js"></script>
+<script src="../../shared/mock-data.js"></script>
+<script src="../../shared/format.js"></script>
+<script src="../../shared/api.js"></script>
+<script src="../../shared/store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
