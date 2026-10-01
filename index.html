@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevFactory · Design Versions</title>
+<style>
+  :root {
+    --ink: #14120f; --ink-2: #55514a; --ink-3: #8a8377;
+    --paper: #f6f4ef; --rule: #ddd7ca; --hi: #ffe14d;
+    --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+  .wrap { width: min(1080px, 100% - 36px); margin: 0 auto; padding: 44px 0 60px; }
+  header { border-bottom: 3px double var(--ink); padding-bottom: 22px; margin-bottom: 30px; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .brand .box { width: 38px; height: 38px; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-size: 15px; font-weight: 700; }
+  .brand b { font-size: 17px; }
+  h1 { font-size: clamp(28px, 4vw, 42px); margin: 0 0 10px; letter-spacing: -.8px; }
+  .lede { margin: 0; color: var(--ink-2); font-size: 15px; line-height: 1.65; max-width: 72ch; }
+  .flow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; align-items: center; }
+  .step { border: 1px solid var(--ink); background: #fffdf8; padding: 7px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; }
+  .arrow { color: var(--ink-3); font-family: var(--mono); }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.6px; color: var(--ink-3); margin: 0 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .card { background: #fffdf8; border: 1px solid var(--ink); box-shadow: 6px 6px 0 rgba(20,18,15,.08); display: flex; flex-direction: column; }
+  .swatch { height: 132px; border-bottom: 1px solid var(--ink); display: grid; place-items: center; position: relative; overflow: hidden; }
+  .swatch .num { position: absolute; top: 10px; left: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 1px; }
+  .swatch-a { background: linear-gradient(135deg, #eef0ff, #f7e9ff 55%, #e6f4ff); color: #4f46e5; }
+  .swatch-a .dots { display: flex; gap: 7px; }
+  .swatch-a .dots i { width: 30px; height: 30px; border-radius: 50%; background: #4f46e5; opacity: .85; box-shadow: 0 8px 18px -8px #4f46e5; }
+  .swatch-a .dots i:nth-child(2) { background: #7c3aed; }
+  .swatch-a .dots i:nth-child(3) { background: #22a8d8; }
+  .swatch-b { background: linear-gradient(135deg, #0b0f16, #12202b); color: #22d3ee; }
+  .swatch-b .bars { display: flex; flex-direction: column; gap: 7px; width: 62%; }
+  .swatch-b .bars i { height: 9px; border-radius: 2px; background: linear-gradient(90deg, #22d3ee, #38bdf8); }
+  .swatch-b .bars i:nth-child(1) { width: 100%; } .swatch-b .bars i:nth-child(2) { width: 72%; opacity: .75; } .swatch-b .bars i:nth-child(3) { width: 88%; opacity: .5; }
+  .swatch-c { background: var(--paper); color: var(--ink); }
+  .swatch-c .lines { width: 64%; display: flex; flex-direction: column; }
+  .swatch-c .lines i { height: 12px; border-bottom: 2px solid var(--ink); }
+  .swatch-c .lines i:nth-child(2) { background: var(--hi); }
+  .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .card-body h3 { margin: 0; font-size: 21px; letter-spacing: -.4px; }
+  .card-body .tag { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .card-body p { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.65; }
+  ul.feat { margin: 4px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 13px; line-height: 1.75; }
+  .open {
+    margin-top: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid var(--ink); background: var(--ink); color: var(--paper); padding: 12px 18px;
+    text-decoration: none; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .9px;
+  }
+  .open:hover { background: #000; box-shadow: 4px 4px 0 var(--hi); }
+  .meta { margin-top: 34px; border-top: 1px solid var(--rule); padding-top: 20px; font-size: 13px; color: var(--ink-2); line-height: 1.75; }
+  .meta b { color: var(--ink); }
+  code { font-family: var(--mono); background: #fff; border: 1px solid var(--rule); padding: 1px 5px; font-size: .9em; }
+  .accounts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+  .account { border: 1px dashed var(--rule); background: #fffdf8; padding: 12px 14px; font-size: 12.5px; }
+  .account b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.1px; color: var(--ink-3); margin-bottom: 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand"><span class="box">DF</span><b>DevFactory</b></div>
+    <h1>Purchase Order Tracker — three design versions</h1>
+    <p class="lede">Same flow, same code underneath, three completely different looks. Pick the direction you like and we can drop the other two.</p>
+    <div class="flow">
+      <span class="step">1 · Login</span><span class="arrow">→</span>
+      <span class="step">2 · Select factory</span><span class="arrow">→</span>
+      <span class="step">3 · Enter PO</span><span class="arrow">→</span>
+      <span class="step">4 · factory_id + records list</span>
+    </div>
+  </header>
+
+  <h2>Choose a version</h2>
+  <div class="grid">
+
+    <article class="card">
+      <div class="swatch swatch-a"><span class="num">v1</span><div class="dots"><i></i><i></i><i></i></div></div>
+      <div class="card-body">
+        <span class="tag">aurora · light &amp; airy</span>
+        <h3>Aurora</h3>
+        <p>Soft gradients, glass cards and a friendly wizard feel. Best for a client-facing or demo-friendly build.</p>
+        <ul class="feat">
+          <li>Centered card flow with 4-step progress pills</li>
+          <li>Factory picker as a card grid</li>
+          <li>Hero band + KPI tiles + status chips</li>
+        </ul>
+        <a class="open" href="versions/aurora/index.html">Open Aurora →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="swatch swatch-b"><span class="num">v2</span><div class="bars"><i></i><i></i><i></i></div></div>
+      <div class="card-body">
+        <span class="tag">graphite · dark console</span>
+        <h3>Graphite</h3>
+        <p>Dark operations console with a sidebar, terminal-style PO input and dense data table. Best for internal power users on shift.</p>
+        <ul class="feat">
+          <li>Persistent sidebar navigation between steps</li>
+          <li>Terminal prompt input with “Resolve” action</li>
+          <li>Slide-in record drawer, mono typography</li>
+        </ul>
+        <a class="open" href="versions/graphite/index.html">Open Graphite →</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="swatch swatch-c"><span class="num">v3</span><div class="lines"><i></i><i></i><i></i><i></i></div></div>
+      <div class="card-body">
+        <span class="tag">paper · editorial ledger</span>
+        <h3>Paper</h3>
+        <p>High-contrast printed-ledger look with serif headings and a ruled table. Best for printable reports and audit-style records.</p>
+        <ul class="feat">
+          <li>Numbered rail tracker, stamped “mock data” badge</li>
+          <li>Factory selector as a numbered ledger table</li>
+          <li>Highlighted matched row, tab-style status filters</li>
+        </ul>
+        <a class="open" href="versions/paper/index.html">Open Paper →</a>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="meta">
+    <p><b>Demo sign-in:</b> <code>planner@demo.com</code> / <code>demo1234</code> — or <code>admin@demo.com</code> / <code>demo1234</code>.</p>
+    <p><b>Try these PO numbers:</b> <code>PO-2026-0001</code> (matches your selected factory), <code>PO-2026-0014</code> (belongs to a different factory — shows the mismatch warning), <code>PO-2026-9999</code> (not found — shows the API error).</p>
+    <p><b>Switching to the real API:</b> open <code>shared/config.js</code>, set <code>useMock: false</code> and put your server in <code>apiBaseUrl</code>. The expected request/response shapes are documented at the top of <code>shared/api.js</code>, and the mappers there accept both camelCase and snake_case field names.</p>
+    <div class="accounts">
+      <div class="account"><b>Login</b><code>POST /auth/login</code> → <code>{ token, user }</code></div>
+      <div class="account"><b>Factories</b><code>GET /factories</code> → <code>{ factories: [] }</code></div>
+      <div class="account"><b>PO → factory_id</b><code>GET /pos/lookup?po=…</code> → <code>{ factory_id, po }</code></div>
+      <div class="account"><b>Records</b><code>GET /pos?factory_id=…</code> → <code>{ records: [] }</code></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

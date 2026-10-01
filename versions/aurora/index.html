@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevFactory · Aurora — PO Tracker</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span></div>
+
+<!-- ─────────────────────────────── top bar ─────────────────────────────── -->
+<header class="topbar">
+  <a class="brand" href="../../index.html">
+    <span class="brand-mark">DF</span>
+    <span class="brand-text"><strong>DevFactory</strong><small>Purchase Order Tracker</small></span>
+  </a>
+  <div class="top-actions">
+    <span class="pill pill-mock" id="mockPill" hidden>Mock API</span>
+    <div class="user-chip" id="userChip" hidden>
+      <span class="avatar" id="userAvatar">–</span>
+      <span class="user-meta"><strong id="userName">–</strong><small id="userRole">–</small></span>
+      <button class="btn ghost sm" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- ───────────────────────────── stepper ───────────────────────────── -->
+  <ol class="steps" id="steps">
+    <li data-step="login"><span class="dot">1</span><span class="lbl">Sign in</span></li>
+    <li data-step="factory"><span class="dot">2</span><span class="lbl">Select factory</span></li>
+    <li data-step="lookup"><span class="dot">3</span><span class="lbl">Find PO</span></li>
+    <li data-step="results"><span class="dot">4</span><span class="lbl">Results</span></li>
+  </ol>
+
+  <div class="alert" id="alert" role="alert" hidden></div>
+
+  <!-- ───────────────────────────── 1 · LOGIN ─────────────────────────── -->
+  <section class="card view" id="view-login">
+    <div class="card-head">
+      <h1>Welcome back</h1>
+      <p>Sign in to look up purchase orders across your factories.</p>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <label class="field">
+        <span class="field-label">Work email</span>
+        <input id="email" type="email" value="planner@demo.com" autocomplete="username" spellcheck="false">
+      </label>
+      <label class="field">
+        <span class="field-label">Password</span>
+        <input id="password" type="password" value="demo1234" autocomplete="current-password">
+      </label>
+      <p class="field-error" id="loginError" hidden></p>
+      <button class="btn primary block" id="loginBtn" type="submit">
+        <span class="spinner" hidden></span><span class="btn-label">Sign in</span>
+      </button>
+    </form>
+
+    <div class="demo-hint">
+      <strong>Demo accounts</strong>
+      <div><code>planner@demo.com</code> · <code>demo1234</code></div>
+      <div><code>admin@demo.com</code> · <code>demo1234</code></div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── 2 · FACTORY ────────────────────────── -->
+  <section class="card view" id="view-factory" hidden>
+    <div class="card-head row">
+      <div>
+        <h1>Select a factory</h1>
+        <p id="factoryCount">–</p>
+      </div>
+      <button class="btn ghost sm" id="reloadFactories" type="button">Refresh</button>
+    </div>
+
+    <div class="search">
+      <span class="search-icon">⌕</span>
+      <input id="factorySearch" type="search" placeholder="Search by name, city or ID…" autocomplete="off">
+    </div>
+
+    <div class="factory-grid" id="factoryGrid"></div>
+    <p class="empty" id="factoryEmpty" hidden>No factories match that search.</p>
+  </section>
+
+  <!-- ───────────────────────────── 3 · LOOKUP ────────────────────────── -->
+  <section class="card view" id="view-lookup" hidden>
+    <button class="back" id="backToFactories" type="button">← Change factory</button>
+    <div class="card-head">
+      <h1>Find a purchase order</h1>
+      <p>Enter a PO number — we'll resolve the <code>factory_id</code> it belongs to and list its records.</p>
+    </div>
+
+    <div class="selected-factory" id="selectedFactory"></div>
+
+    <form id="poForm" novalidate>
+      <div class="po-wrap">
+        <label class="field po-field">
+          <span class="field-label">PO number</span>
+          <input id="poInput" type="text" placeholder="e.g. PO-2026-0001" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="suggestions">
+        </label>
+        <ul class="suggestions" id="suggestions" role="listbox" hidden></ul>
+      </div>
+      <p class="field-error" id="poError" hidden></p>
+      <button class="btn primary block" id="lookupBtn" type="submit">
+        <span class="spinner" hidden></span><span class="btn-label">Fetch factory &amp; records</span>
+      </button>
+    </form>
+
+    <p class="hint">Try <button class="link" type="button" data-demo-po="PO-2026-0014">PO-2026-0014</button> (belongs to another factory) or <button class="link" type="button" data-demo-po="PO-2026-9999">PO-2026-9999</button> (not found).</p>
+  </section>
+
+  <!-- ──────────────────────────── 4 · RESULTS ────────────────────────── -->
+  <section class="view" id="view-results" hidden>
+    <div class="results-top">
+      <button class="back" id="backToLookup" type="button">← Search another PO</button>
+      <div class="crumbs" id="crumbs"></div>
+    </div>
+
+    <article class="hero" id="poHero"></article>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Factory records</h2>
+          <p id="recordsMeta">–</p>
+        </div>
+        <div class="search search-inline">
+          <span class="search-icon">⌕</span>
+          <input id="listSearch" type="search" placeholder="Filter records…" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="chips" id="statusChips"></div>
+
+      <div class="table-scroll">
+        <table class="table" id="recordsTable">
+          <thead>
+            <tr>
+              <th>PO</th><th>Buyer</th><th>Style</th><th>Item</th>
+              <th class="ta-r">Qty</th><th>Status</th><th>Progress</th>
+              <th>Ship date</th><th class="ta-r">Value</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="recordsEmpty" hidden>No records match your filters.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ────────────────────────────── overlays ─────────────────────────────── -->
+<div class="toasts" id="toasts"></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header class="modal-head">
+      <h3 id="modalTitle">Record</h3>
+      <button class="icon-btn" data-close type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="../../shared/config.js"></script>
+<script src="../../shared/mock-data.js"></script>
+<script src="../../shared/format.js"></script>
+<script src="../../shared/api.js"></script>
+<script src="../../shared/store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
