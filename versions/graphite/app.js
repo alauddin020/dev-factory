@@ -33,7 +33,7 @@
     $('screen-app').hidden = !loggedIn;
     $('mockPill').hidden = !window.Api.isMock;
 
-    if (!loggedIn) { renderLogin(s); return; }
+    if (!loggedIn) { renderLogin(s); renderToasts(s); renderDrawer(s); return; }
 
     /* sidebar + header ------------------------------------------------- */
     var step = s.step === 'login' ? 'factory' : s.step;
@@ -53,17 +53,17 @@
 
     /* alert ------------------------------------------------------------ */
     var al = $('alert');
-    al.hidden = !(s.error && s.step === 'factory');
+    al.hidden = !(s.error && step === 'factory');
     if (!al.hidden) al.textContent = s.error.message;
 
     /* views ------------------------------------------------------------ */
-    $('view-factory').hidden = s.step !== 'factory';
-    $('view-lookup').hidden = s.step !== 'lookup';
-    $('view-results').hidden = s.step !== 'results';
+    $('view-factory').hidden = step !== 'factory';
+    $('view-lookup').hidden = step !== 'lookup';
+    $('view-results').hidden = step !== 'results';
 
-    if (s.step === 'factory') renderFactories(s);
-    if (s.step === 'lookup') renderLookup(s);
-    if (s.step === 'results') renderResults(s);
+    if (step === 'factory') renderFactories(s);
+    if (step === 'lookup') renderLookup(s);
+    if (step === 'results') renderResults(s);
 
     renderToasts(s);
     renderDrawer(s);
@@ -83,8 +83,10 @@
     var list = s.factories.filter(function (f) {
       return !q || [f.id, f.name, f.city, f.country].join(' ').toLowerCase().indexOf(q) !== -1;
     });
-    $('factoryCount').textContent = list.length + ' / ' + s.factories.length + ' factories';
-    $('factoryEmpty').hidden = list.length > 0;
+    $('factoryCount').textContent = s.busy === 'factories' && !s.factories.length
+      ? 'loading…'
+      : list.length + ' / ' + s.factories.length + ' factories';
+    $('factoryEmpty').hidden = list.length > 0 || s.busy === 'factories';
 
     $('factoryGrid').innerHTML = list.map(function (f) {
       return '<button class="fac" type="button" data-factory="' + F.esc(f.id) + '">' +
